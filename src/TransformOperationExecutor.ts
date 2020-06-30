@@ -28,7 +28,7 @@ export class TransformOperationExecutor {
 
   constructor(
     private transformationType: TransformationType,
-    private options: ClassTransformOptions,
+    private options: ClassTransformOptions
   ) {}
 
   // -------------------------------------------------------------------------
@@ -41,13 +41,14 @@ export class TransformOperationExecutor {
     targetType: Function | TypeMetadata,
     arrayType: Function,
     isMap: boolean,
-    level: number = 0,
+    level: number = 0
   ) {
     if (Array.isArray(value) || value instanceof Set) {
-      const newValue = arrayType &&
+      const newValue =
+        arrayType &&
         this.transformationType === TransformationType.PLAIN_TO_CLASS
-        ? instantiateArrayType(arrayType)
-        : [];
+          ? instantiateArrayType(arrayType)
+          : [];
 
       (value as any[]).forEach((subValue, index) => {
         const subSource = source ? source[index] : undefined;
@@ -62,10 +63,10 @@ export class TransformOperationExecutor {
               realTargetType = targetType.options.discriminator.subTypes.find(
                 (subType) =>
                   subType.name ===
-                    subValue[
-                      (targetType as { options: TypeOptions })?.options
-                        ?.discriminator?.property as any
-                    ],
+                  subValue[
+                    (targetType as { options: TypeOptions })?.options
+                      ?.discriminator?.property as any
+                  ]
               );
               const options: TypeHelpOptions = {
                 newObject: newValue,
@@ -87,7 +88,7 @@ export class TransformOperationExecutor {
               subValue[
                 targetType.options.discriminator.property
               ] = targetType.options.discriminator.subTypes.find(
-                (subType) => subType.value === subValue.constructor,
+                (subType) => subType.value === subValue.constructor
               )?.name;
             }
           } else {
@@ -99,7 +100,7 @@ export class TransformOperationExecutor {
             realTargetType,
             undefined as any,
             subValue instanceof Map,
-            level + 1,
+            level + 1
           );
 
           if (newValue instanceof Set) {
@@ -179,11 +180,10 @@ export class TransformOperationExecutor {
           propertyName = key;
         if (!this.options.ignoreDecorators && targetType) {
           if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-            const exposeMetadata = defaultMetadataStorage
-              .findExposeMetadataByCustomName(
-                targetType as Function,
-                key,
-              );
+            const exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(
+              targetType as Function,
+              key
+            );
             if (exposeMetadata) {
               propertyName = exposeMetadata.propertyName;
               newValueKey = exposeMetadata.propertyName;
@@ -194,7 +194,7 @@ export class TransformOperationExecutor {
           ) {
             const exposeMetadata = defaultMetadataStorage.findExposeMetadata(
               targetType as Function,
-              key,
+              key
             );
             if (
               exposeMetadata &&
@@ -224,7 +224,7 @@ export class TransformOperationExecutor {
         } else if (targetType) {
           const metadata = defaultMetadataStorage.findTypeMetadata(
             targetType as Function,
-            propertyName,
+            propertyName
           );
           if (metadata) {
             const options: TypeHelpOptions = {
@@ -247,19 +247,18 @@ export class TransformOperationExecutor {
                     (subType) => {
                       const has = (metadata?.options
                         ?.discriminator as Discriminator)?.property as
-                          | string
-                          | number;
+                        | string
+                        | number;
                       if (subValue && has in subValue) {
                         return (
                           subType.name ===
-                            subValue[
-                              (metadata?.options
-                                ?.discriminator as Discriminator)
-                                ?.property
-                            ]
+                          subValue[
+                            (metadata?.options?.discriminator as Discriminator)
+                              ?.property
+                          ]
                         );
                       }
-                    },
+                    }
                   );
                   type === undefined ? (type = newType) : (type = type.value);
                   if (!metadata.options.keepDiscriminatorProperty) {
@@ -282,7 +281,7 @@ export class TransformOperationExecutor {
                   subValue[
                     metadata.options.discriminator.property
                   ] = metadata?.options?.discriminator?.subTypes?.find?.(
-                    (subType) => subType.value === subValue.constructor,
+                    (subType) => subType.value === subValue.constructor
                   )?.name;
                 }
               } else {
@@ -297,7 +296,7 @@ export class TransformOperationExecutor {
             this.options.targetMaps
               .filter(
                 (map) =>
-                  map.target === targetType && !!map.properties[propertyName],
+                  map.target === targetType && !!map.properties[propertyName]
               )
               .forEach((map) => (type = map.properties[propertyName]));
           } else if (
@@ -306,12 +305,11 @@ export class TransformOperationExecutor {
           ) {
             // if we have no registererd type via the @Type() decorator then we check if we have any
             // type declarations in reflect-metadata (type declaration is emited only if some decorator is added to the property.)
-            const reflectedType = ((Reflect as { getMetadata: Function })
-              .getMetadata as Function)(
-                "design:type",
-                (targetType as Function).prototype,
-                propertyName,
-              );
+            const reflectedType = (Reflect as any).getMetadata(
+              "design:type",
+              (targetType as Function).prototype,
+              propertyName
+            );
 
             if (reflectedType) {
               type = reflectedType;
@@ -336,12 +334,11 @@ export class TransformOperationExecutor {
         if (newValue.constructor.prototype) {
           const descriptor = Object.getOwnPropertyDescriptor(
             newValue.constructor.prototype,
-            newValueKey,
+            newValueKey
           );
           if (
             (this.transformationType === TransformationType.PLAIN_TO_CLASS ||
-              this.transformationType ===
-                TransformationType.CLASS_TO_CLASS) &&
+              this.transformationType === TransformationType.CLASS_TO_CLASS) &&
             ((descriptor && !descriptor.set) ||
               newValue[newValueKey] instanceof Function)
           ) {
@@ -366,12 +363,11 @@ export class TransformOperationExecutor {
               targetType as Function,
               transformKey,
               value,
-              this.transformationType,
+              this.transformationType
             );
             // If nothing change, it means no custom transformation was applied, so use the subValue.
-            finalValue = value[transformKey] === finalValue
-              ? subValue
-              : finalValue;
+            finalValue =
+              value[transformKey] === finalValue ? subValue : finalValue;
             // Apply the default transformation
             finalValue = this.transform(
               subSource,
@@ -379,7 +375,7 @@ export class TransformOperationExecutor {
               type,
               arrayType,
               isSubValueMap,
-              level + 1,
+              level + 1
             );
           } else {
             finalValue = this.transform(
@@ -388,14 +384,14 @@ export class TransformOperationExecutor {
               type,
               arrayType,
               isSubValueMap,
-              level + 1,
+              level + 1
             );
             finalValue = this.applyCustomTransformations(
               finalValue,
               targetType as Function,
               transformKey,
               value,
-              this.transformationType,
+              this.transformationType
             );
           }
 
@@ -413,7 +409,7 @@ export class TransformOperationExecutor {
             targetType as Function,
             key,
             value,
-            this.transformationType,
+            this.transformationType
           );
           if (newValue instanceof Map) {
             newValue.set(newValueKey, finalValue);
@@ -438,12 +434,12 @@ export class TransformOperationExecutor {
     target: Function,
     key: string,
     obj: any,
-    transformationType: TransformationType,
+    transformationType: TransformationType
   ) {
     let metadatas = defaultMetadataStorage.findTransformMetadatas(
       target,
       key,
-      this.transformationType,
+      this.transformationType
     );
 
     // apply versioning options
@@ -453,7 +449,7 @@ export class TransformOperationExecutor {
 
         return this.checkVersion(
           metadata?.options?.since as number,
-          metadata?.options?.until as number,
+          metadata?.options?.until as number
         );
       });
     }
@@ -514,13 +510,13 @@ export class TransformOperationExecutor {
       // add all exposed to list of keys
       let exposedProperties = defaultMetadataStorage.getExposedProperties(
         target,
-        this.transformationType,
+        this.transformationType
       );
       if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
         exposedProperties = exposedProperties.map((key) => {
           const exposeMetadata = defaultMetadataStorage.findExposeMetadata(
             target,
-            key,
+            key
           );
           if (
             exposeMetadata &&
@@ -542,7 +538,7 @@ export class TransformOperationExecutor {
       // exclude excluded properties
       const excludedProperties = defaultMetadataStorage.getExcludedProperties(
         target,
-        this.transformationType,
+        this.transformationType
       );
       if (excludedProperties.length > 0) {
         keys = keys.filter((key) => {
@@ -555,13 +551,13 @@ export class TransformOperationExecutor {
         keys = keys.filter((key) => {
           const exposeMetadata = defaultMetadataStorage.findExposeMetadata(
             target,
-            key,
+            key
           );
           if (!exposeMetadata || !exposeMetadata.options) return true;
 
           return this.checkVersion(
             exposeMetadata?.options?.since as number,
-            exposeMetadata?.options?.until as number,
+            exposeMetadata?.options?.until as number
           );
         });
       }
@@ -571,7 +567,7 @@ export class TransformOperationExecutor {
         keys = keys.filter((key) => {
           const exposeMetadata = defaultMetadataStorage.findExposeMetadata(
             target,
-            key,
+            key
           );
           if (!exposeMetadata || !exposeMetadata.options) return true;
 
@@ -581,7 +577,7 @@ export class TransformOperationExecutor {
         keys = keys.filter((key) => {
           const exposeMetadata = defaultMetadataStorage.findExposeMetadata(
             target,
-            key,
+            key
           );
           return (
             !exposeMetadata ||
@@ -626,7 +622,7 @@ export class TransformOperationExecutor {
     if (!groups) return true;
 
     return this.options?.groups?.some(
-      (optionGroup) => groups.indexOf(optionGroup) !== -1,
+      (optionGroup) => groups.indexOf(optionGroup) !== -1
     );
   }
 }
