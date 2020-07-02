@@ -8,7 +8,7 @@ if (!("getMetadata" in Reflect)) {
   console.log(
     "\n",
     fmt(`!!! import reflect-metadata into your main file !!!`),
-    `\n--> https://raw.githubusercontent.com/rbuckton/reflect-metadata/v0.1.12/Reflect.js`,
+    `\n--> import "https://raw.githubusercontent.com/rbuckton/reflect-metadata/v0.1.12/Reflect.js"`,
     "\n",
   );
 }
