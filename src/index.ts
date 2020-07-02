@@ -2,15 +2,15 @@ if (!("getMetadata" in Reflect)) {
   const { bold, bgRed, white } = await import(
     "https://deno.land/std/fmt/colors.ts"
   );
-  await import(
-    "https://raw.githubusercontent.com/rbuckton/reflect-metadata/master/Reflect.ts"
-  );
 
   const fmt = (text: string) => bold(bgRed(white(text.toUpperCase())));
 
-  console.log("\n");
-  console.log(fmt(`!!! import reflect-metadata into your main file !!!`));
-  console.log("\n");
+  console.log(
+    "\n",
+    fmt(`!!! import reflect-metadata into your main file !!!`),
+    `\n--> https://raw.githubusercontent.com/rbuckton/reflect-metadata/v0.1.12/Reflect.js`,
+    "\n",
+  );
 }
 
 import { ClassTransformer, ClassType } from "./ClassTransformer.ts";

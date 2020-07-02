@@ -18,10 +18,7 @@ export class MetadataStorage {
     Map<string, TransformMetadata[]>
   >();
   private _exposeMetadatas = new Map<Function, Map<string, ExposeMetadata>>();
-  private _excludeMetadatas = new Map<
-    Function,
-    Map<string, ExcludeMetadata>
-  >();
+  private _excludeMetadatas = new Map<Function, Map<string, ExcludeMetadata>>();
   private _ancestorsMap = new Map<Function, Function[]>();
 
   // -------------------------------------------------------------------------
@@ -30,14 +27,11 @@ export class MetadataStorage {
 
   addTypeMetadata(metadata: TypeMetadata) {
     if (!this._typeMetadatas.has(metadata.target)) {
-      this._typeMetadatas.set(
-        metadata.target,
-        new Map<string, TypeMetadata>(),
-      );
+      this._typeMetadatas.set(metadata.target, new Map<string, TypeMetadata>());
     }
-    this._typeMetadatas
-      .get(metadata.target)
-      .set(metadata.propertyName, metadata);
+    this?._typeMetadatas
+      ?.get(metadata.target)
+      ?.set(metadata.propertyName, metadata);
   }
 
   addTransformMetadata(metadata: TransformMetadata) {
@@ -49,17 +43,17 @@ export class MetadataStorage {
     }
     if (
       !this._transformMetadatas
-        .get(metadata.target)
-        .has(metadata.propertyName)
+        ?.get(metadata.target)
+        ?.has(metadata.propertyName)
     ) {
       this._transformMetadatas
-        .get(metadata.target)
-        .set(metadata.propertyName, []);
+        ?.get(metadata.target)
+        ?.set(metadata.propertyName, []);
     }
     this._transformMetadatas
-      .get(metadata.target)
-      .get(metadata.propertyName)
-      .push(metadata);
+      ?.get(metadata.target)
+      ?.get(metadata.propertyName)
+      ?.push(metadata);
   }
 
   addExposeMetadata(metadata: ExposeMetadata) {
@@ -70,8 +64,8 @@ export class MetadataStorage {
       );
     }
     this._exposeMetadatas
-      .get(metadata.target)
-      .set(metadata.propertyName, metadata);
+      ?.get(metadata.target)
+      ?.set(metadata.propertyName, metadata);
   }
 
   addExcludeMetadata(metadata: ExcludeMetadata) {
@@ -82,8 +76,8 @@ export class MetadataStorage {
       );
     }
     this._excludeMetadatas
-      .get(metadata.target)
-      .set(metadata.propertyName, metadata);
+      ?.get(metadata.target)
+      ?.set(metadata.propertyName, metadata);
   }
 
   // -------------------------------------------------------------------------
@@ -125,11 +119,14 @@ export class MetadataStorage {
   findExcludeMetadata(
     target: Function,
     propertyName: string,
-  ): ExcludeMetadata {
+  ): ExcludeMetadata | undefined {
     return this.findMetadata(this._excludeMetadatas, target, propertyName);
   }
 
-  findExposeMetadata(target: Function, propertyName: string): ExposeMetadata {
+  findExposeMetadata(
+    target: Function,
+    propertyName: string,
+  ): ExposeMetadata | undefined {
     return this.findMetadata(this._exposeMetadatas, target, propertyName);
   }
 
@@ -137,9 +134,9 @@ export class MetadataStorage {
     target: Function,
     name: string,
   ): ExposeMetadata {
-    return this.getExposedMetadatas(target).find((metadata) => {
+    return this.getExposedMetadatas?.(target).find((metadata: any) => {
       return metadata.options && metadata.options.name === name;
-    });
+    }) as ExposeMetadata;
   }
 
   findTypeMetadata(target: Function, propertyName: string) {
@@ -148,9 +145,9 @@ export class MetadataStorage {
 
   getStrategy(target: Function): "excludeAll" | "exposeAll" | "none" {
     const excludeMap = this._excludeMetadatas.get(target);
-    const exclude = excludeMap && excludeMap.get(undefined);
+    const exclude = excludeMap && excludeMap.get(undefined as any);
     const exposeMap = this._exposeMetadatas.get(target);
-    const expose = exposeMap && exposeMap.get(undefined);
+    const expose = exposeMap && exposeMap.get(undefined as any);
     if ((exclude && expose) || (!exclude && !expose)) return "none";
     return exclude ? "excludeAll" : "exposeAll";
   }
@@ -179,15 +176,12 @@ export class MetadataStorage {
 
         if (metadata.options.toClassOnly === true) {
           return (
-            transformationType ===
-              TransformationType.CLASS_TO_CLASS ||
+            transformationType === TransformationType.CLASS_TO_CLASS ||
             transformationType === TransformationType.PLAIN_TO_CLASS
           );
         }
         if (metadata.options.toPlainOnly === true) {
-          return (
-            transformationType === TransformationType.CLASS_TO_PLAIN
-          );
+          return transformationType === TransformationType.CLASS_TO_PLAIN;
         }
 
         return true;
@@ -211,15 +205,12 @@ export class MetadataStorage {
 
         if (metadata.options.toClassOnly === true) {
           return (
-            transformationType ===
-              TransformationType.CLASS_TO_CLASS ||
+            transformationType === TransformationType.CLASS_TO_CLASS ||
             transformationType === TransformationType.PLAIN_TO_CLASS
           );
         }
         if (metadata.options.toPlainOnly === true) {
-          return (
-            transformationType === TransformationType.CLASS_TO_PLAIN
-          );
+          return transformationType === TransformationType.CLASS_TO_PLAIN;
         }
 
         return true;
@@ -243,14 +234,15 @@ export class MetadataStorage {
     target: Function,
   ): T[] {
     const metadataFromTargetMap = metadatas.get(target);
-    let metadataFromTarget: T[];
+    let metadataFromTarget: T[] | undefined;
     if (metadataFromTargetMap) {
-      metadataFromTarget = Array.from(
-        metadataFromTargetMap.values(),
-      ).filter((meta) => meta.propertyName !== undefined);
+      metadataFromTarget = Array.from(metadataFromTargetMap.values()).filter(
+        (meta) => meta.propertyName !== undefined,
+      );
     }
     let metadataFromAncestors: T[] = [];
-    for (const ancestor of this.getAncestors(target)) {
+
+    for (const ancestor of this.getAncestors(target) || []) {
       const ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         const metadataFromAncestor = Array.from(
@@ -266,7 +258,7 @@ export class MetadataStorage {
     metadatas: Map<Function, Map<string, T>>,
     target: Function,
     propertyName: string,
-  ): T {
+  ): T | undefined {
     const metadataFromTargetMap = metadatas.get(target);
     if (metadataFromTargetMap) {
       const metadataFromTarget = metadataFromTargetMap.get(propertyName);
@@ -274,7 +266,7 @@ export class MetadataStorage {
         return metadataFromTarget;
       }
     }
-    for (const ancestor of this.getAncestors(target)) {
+    for (const ancestor of this.getAncestors(target) || []) {
       const ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         const ancestorResult = ancestorMetadataMap.get(propertyName);
@@ -292,38 +284,35 @@ export class MetadataStorage {
     propertyName: string,
   ): T[] {
     const metadataFromTargetMap = metadatas.get(target);
-    let metadataFromTarget: T[];
+    let metadataFromTarget: T[] | undefined = undefined;
+
     if (metadataFromTargetMap) {
-      metadataFromTarget = metadataFromTargetMap.get(propertyName);
+      metadataFromTarget = metadataFromTargetMap.get(propertyName) as T[];
     }
     let metadataFromAncestorsTarget: T[] = [];
-    for (const ancestor of this.getAncestors(target)) {
+    for (const ancestor of this.getAncestors(target) || []) {
       const ancestorMetadataMap = metadatas.get(ancestor);
       if (ancestorMetadataMap) {
         if (ancestorMetadataMap.has(propertyName)) {
           metadataFromAncestorsTarget.push(
-            ...ancestorMetadataMap.get(propertyName),
+            ...(ancestorMetadataMap.get(propertyName) as any),
           );
         }
       }
     }
     return metadataFromAncestorsTarget
       .reverse()
-      .concat((metadataFromTarget || []).reverse());
+      .concat((metadataFromTarget ?? []).reverse());
   }
 
-  private getAncestors(target: Function): Function[] {
+  private getAncestors(target: Function): Function[] | undefined {
     if (!target) return [];
     if (!this._ancestorsMap.has(target)) {
       let ancestors: Function[] = [];
       for (
-        let baseClass = Object.getPrototypeOf(
-          target.prototype.constructor,
-        );
+        let baseClass = Object.getPrototypeOf(target.prototype.constructor);
         typeof baseClass.prototype !== "undefined";
-        baseClass = Object.getPrototypeOf(
-          baseClass.prototype.constructor,
-        )
+        baseClass = Object.getPrototypeOf(baseClass.prototype.constructor)
       ) {
         ancestors.push(baseClass);
       }

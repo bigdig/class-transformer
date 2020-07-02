@@ -161,7 +161,11 @@ export function TransformPlainToClass(
     descriptor: PropertyDescriptor,
   ) {
     const classTransformer: ClassTransformer = new ClassTransformer();
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor?.value;
+
+    if (!descriptor) {
+      throw new TypeError("TransformPlainToClass is class decorator");
+    }
 
     descriptor.value = function (...args: any[]) {
       const result: any = originalMethod.apply(this, args);
