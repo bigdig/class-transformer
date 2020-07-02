@@ -237,8 +237,8 @@ export class TransformOperationExecutor {
               ? metadata.typeFunction(options)
               : metadata.reflectedType;
             if (
-              metadata.options.discriminator?.property &&
-              metadata.options.discriminator?.subTypes
+              metadata.options?.discriminator?.property &&
+              metadata.options?.discriminator?.subTypes
             ) {
               if (!(value[valueKey] instanceof Array)) {
                 if (
