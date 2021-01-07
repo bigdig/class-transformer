@@ -16,8 +16,8 @@ if (!("getMetadata" in Reflect)) {
 import { ClassTransformer, ClassType } from "./ClassTransformer.ts";
 import { ClassTransformOptions } from "./ClassTransformOptions.ts";
 
-export { ClassTransformer } from "./ClassTransformer.ts";
-export { ClassTransformOptions } from "./ClassTransformOptions.ts";
+// export { ClassTransformer } from "./ClassTransformer.ts";
+// export { ClassTransformOptions } from "./ClassTransformOptions.ts";
 export * from "./metadata/ExposeExcludeOptions.ts";
 export * from "./decorators.ts";
 
